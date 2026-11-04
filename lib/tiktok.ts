@@ -27,16 +27,13 @@ const TIKWM_API = `${TIKWM_ORIGIN}/api/`;
 const STATS_ENDPOINT = 'https://compteurs.timeo-jeannin.workers.dev';
 
 export function countVideoSubmission(): void {
-  if (navigator.onLine === false) return;
-  try {
-    void fetch(STATS_ENDPOINT + '/hit', {
-      method: 'POST',
-      keepalive: true,
-      credentials: 'omit',
-      referrerPolicy: 'no-referrer',
-      body: JSON.stringify({ nom: 'pastetok-videos', n: 1 }),
-    }).catch(() => {});
-  } catch { /* Statistics must never interrupt a submission. */ }
+  void fetch(STATS_ENDPOINT + '/hit', {
+    method: 'POST',
+    keepalive: true,
+    credentials: 'omit',
+    referrerPolicy: 'no-referrer',
+    body: JSON.stringify({ nom: 'pastetok-videos' }),
+  }).catch(() => {}); // Statistics must never interrupt a submission.
 }
 
 // tikwm sometimes returns relative paths (/video/media/...) instead of absolute CDN URLs

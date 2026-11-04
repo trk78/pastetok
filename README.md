@@ -32,7 +32,7 @@ Free · No sign-up · No ads · No cookies · English & French
 
 ## ⚙️ How it works
 
-PasteTok is a static Next.js export: video retrieval and downloading run in the visitor's browser. When a valid link is submitted, an anonymous Cloudflare Worker counter receives only `{nom: 'pastetok-videos', n: 1}`, with no personal data or link in the payload. Only the cumulative total is stored; nothing else is collected by the application. The request does not wait for retrieval to succeed and never blocks it; offline submissions are not queued or retried.
+PasteTok is a static Next.js export: video retrieval and downloading run in the visitor's browser. When a valid link is submitted, an anonymous Cloudflare Worker counter receives only `{nom: 'pastetok-videos'}`, with no personal data or link in the payload. Only the cumulative total is stored; nothing else is collected by the application. Cloudflare sees the visitor's IP address to deliver the request and limit repeated calls; the application does not store it. The request does not wait for retrieval to succeed and never blocks it; offline submissions are not queued or retried.
 
 ```mermaid
 sequenceDiagram
@@ -40,9 +40,11 @@ sequenceDiagram
     participant P as PasteTok<br/>(browser)
     participant W as tikwm.com
     participant C as TikTok CDN
+    participant S as Counter<br/>(Cloudflare Worker)
 
     U->>P: Pastes the TikTok link
     P->>P: Validates the domain
+    P-)S: POST /hit (counter name)
     P->>W: POST /api/ (url)
     W-->>P: Metadata + MP4/MP3 links
     U->>P: Picks a format
