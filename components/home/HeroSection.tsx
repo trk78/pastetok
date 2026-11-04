@@ -42,7 +42,7 @@ export default function HeroSection({ lang }: { lang: Lang }) {
       sessionStorage.setItem('tiktok_video', JSON.stringify(result.video));
       router.push(ROUTES[lang].download);
     } catch {
-      setError(t.errors.network);
+      setError(t.errors.unavailable);
     } finally {
       setLoading(false);
     }

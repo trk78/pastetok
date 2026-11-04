@@ -34,7 +34,7 @@ export function matchRoute(pathname: string): { lang: Lang; page: PageKey } {
   return { lang: path.startsWith('/en/') ? 'en' : 'fr', page: 'home' };
 }
 
-export type TikTokErrorCode = 'private' | 'not_found' | 'invalid' | 'unavailable' | 'timeout' | 'network';
+export type TikTokErrorCode = 'private' | 'not_found' | 'invalid' | 'unavailable';
 
 const fr = {
   meta: {
@@ -69,9 +69,7 @@ const fr = {
     private: 'Cette vidéo est privée.',
     not_found: 'Vidéo introuvable ou supprimée.',
     invalid: 'Impossible de récupérer la vidéo. Vérifiez le lien.',
-    unavailable: 'Service temporairement indisponible.',
-    timeout: 'La requête a expiré. Réessayez.',
-    network: 'Erreur réseau. Réessayez dans quelques instants.',
+    unavailable: 'Le service est temporairement indisponible. Réessayez dans quelques instants.',
   } satisfies Record<TikTokErrorCode, string>,
   how: {
     title: 'Comment ça marche ?',
@@ -169,9 +167,7 @@ const en: Dict = {
     private: 'This video is private.',
     not_found: 'Video not found or deleted.',
     invalid: "Couldn't fetch the video. Check the link.",
-    unavailable: 'Service temporarily unavailable.',
-    timeout: 'The request timed out. Try again.',
-    network: 'Network error. Try again in a moment.',
+    unavailable: 'The service is temporarily unavailable. Please try again in a moment.',
   },
   how: {
     title: 'How does it work?',

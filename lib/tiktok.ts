@@ -37,9 +37,14 @@ export function countVideoSubmission(): void {
 }
 
 // tikwm sometimes returns relative paths (/video/media/...) instead of absolute CDN URLs
-function absolute(url: string | undefined): string {
-  if (!url) return '';
-  return url.startsWith('/') ? TIKWM_ORIGIN + url : url;
+function absolute(url: unknown): string {
+  if (typeof url !== 'string' || !url) return '';
+  try {
+    const parsed = new URL(url.startsWith('/') ? TIKWM_ORIGIN + url : url);
+    return ['http:', 'https:'].includes(parsed.protocol) ? parsed.href : '';
+  } catch {
+    return '';
+  }
 }
 
 export async function fetchTikTokVideo(url: string): Promise<TikTokApiResponse> {
@@ -59,17 +64,25 @@ export async function fetchTikTokVideo(url: string): Promise<TikTokApiResponse> 
     const data = await response.json();
 
     if (data.code !== 0 || !data.data) {
-      const msg = data.msg?.toLowerCase() || '';
+      const msg = typeof data?.msg === 'string' ? data.msg.toLowerCase() : '';
       if (msg.includes('private') || msg.includes('privé')) {
         return { success: false, error: 'private' };
       }
       if (msg.includes('not found') || msg.includes('deleted')) {
         return { success: false, error: 'not_found' };
       }
-      return { success: false, error: 'invalid' };
+      // tikwm answers a bad or dead link with code -1 and "Url parsing is failed"
+      if (msg.includes('parsing')) {
+        return { success: false, error: 'invalid' };
+      }
+      return { success: false, error: 'unavailable' };
     }
 
     const d = data.data;
+    const noWatermarkUrl = absolute(d.play) || absolute(d.wmplay);
+    if (!noWatermarkUrl) {
+      return { success: false, error: 'unavailable' };
+    }
 
     return {
       success: true,
@@ -82,16 +95,13 @@ export async function fetchTikTokVideo(url: string): Promise<TikTokApiResponse> 
         duration: d.duration || 0,
         plays: d.play_count || 0,
         likes: d.digg_count || 0,
-        noWatermarkUrl: absolute(d.play || d.wmplay),
+        noWatermarkUrl,
         watermarkUrl: absolute(d.wmplay || d.play),
         audioUrl: absolute(d.music),
       },
     };
-  } catch (err) {
-    if (err instanceof Error && err.name === 'TimeoutError') {
-      return { success: false, error: 'timeout' };
-    }
-    return { success: false, error: 'network' };
+  } catch {
+    return { success: false, error: 'unavailable' };
   }
 }
 
